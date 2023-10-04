@@ -11,12 +11,12 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import datetime
-import colorama
 import os
 import json
-from colorama import Fore
-from colorama import Style
-
+import argparse
+from colorama import Fore, Style
+    
+    
 print("-"*40)
 print("| Script location:", __file__)
 print("| Current working directory:", Fore.YELLOW + os.getcwd() + Style.RESET_ALL)
