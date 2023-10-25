@@ -16,6 +16,15 @@ TA support script for NCCU Course
 5. Input the score, check the attendance and homework.
 6. Input '0' or 'end' to stop.
 
+## Extra Package Required
+    
+- colorama
+- pandas
+    
+```sh
+pip install colorama pandas
+```
+
 """
 import re
 import os
@@ -26,7 +35,7 @@ from typing import Optional, Literal, Iterable
 import pandas as pd
 from colorama import Fore, Style
 
-RESERVED_COL = ['序號', '組別', '系級', '學號', '姓名']
+RESERVED_COL = ['組別', '系級', '學號', '姓名']
 
 # pylint: disable=line-too-long
 
@@ -233,10 +242,11 @@ def check_col(
                 Style.RESET_ALL+Fore.BLUE+">>> " + Style.RESET_ALL
             )
             if is_add_new_col == 'y':
-                target[col] = 0.0
                 if mode == 'group':
+                    target[col] = 0.0
                     target[col] = target[col].astype(float)
                 else:
+                    target[col] = '0'
                     target[col] = target[col].astype(str)
                 is_add = True
             elif is_add_new_col == 'n':
@@ -245,9 +255,15 @@ def check_col(
                     f"| {col} would not be added." + Style.RESET_ALL
                 )
                 is_add = False
+    else:
+        is_add = True
+        if mode == 'group':
+            target[col] = target[col].astype(float)
+        else:
+            target[col] = target[col].astype(str)
+
     target['學號'] = target['學號'].astype(str)
     target['組別'] = target['組別'].astype(str)
-
     p = re.compile('[a-zA-Z0-9]+')
     target['組別'] = target['組別'].apply(lambda x: p.findall(x)[0])
 
@@ -288,9 +304,12 @@ def handle_input(
         hint_for_group = ' (multiple title divided by \',\')' if mode == 'group' else ''
         raw_col = input(
             Fore.BLUE + "| 輸入欲修改的欄位: "+hint_for_group+"\n>>> "+Style.RESET_ALL)
+        if raw_col == '':
+            continue
         titles_raw = raw_col.split(',')
         titles_raw = [s.strip() for s in titles_raw]
         titles_raw = [title_parse.findall(s)[0] for s in titles_raw]
+        print(titles_raw)
 
         if mode == 'group':
             is_confirmed = input(
@@ -318,7 +337,7 @@ def handle_input(
         for i, t in enumerate(titles_raw):
             target, is_add = check_col(target, t, mode)
             if is_add:
-                titles.append(title_parse)
+                titles.append(t)
 
         if len(titles) == 0:
             colunm_not_decide = True
@@ -437,10 +456,12 @@ def handle_input(
             if len(check) == 0:
                 target.loc[(target['學號'] == student_id), titles[0]] = "1"
             elif check == 'l':
-                target.loc[(target['學號'] == student), titles[0]] = "假"
+                target.loc[(target['學號'] == student_id), titles[0]] = "假"
             else:
                 print(Fore.RED+Style.BRIGHT +
                       f'| No assign for {student}'+Style.RESET_ALL)
+            print(target[target['學號'] == student_id][
+                list(reserved_col)+titles])
 
         target.to_excel(target_path, index=False)
 
