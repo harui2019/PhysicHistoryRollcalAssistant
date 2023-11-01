@@ -404,7 +404,7 @@ def handle_input(
                 lambda x: damerau_levenshtein_distance_py(student, x) <= 3
             )
             similar_name = target['姓名'].astype(str).apply(
-                lambda x: damerau_levenshtein_distance_py(student, x) <= 1
+                lambda x: damerau_levenshtein_distance_py(student, x) <= 2
             )
             if len(similar_id) > 0:
                 print("| Similar id:\n", target[similar_id])
